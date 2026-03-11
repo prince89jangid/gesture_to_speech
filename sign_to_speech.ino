@@ -61,7 +61,7 @@ String webpage = R"====(
         let data = await response.text();
         setDisplay(data);
         textTOSpeech();
-      }, 2000);
+      }, 1000);
     </script>
   </body>
 </html>
@@ -75,18 +75,71 @@ void handleRoot() {
 }
 
 void getSign() {
+
+  //  d c b a
+  int a = digitalRead(18);
+  int b = digitalRead(5);
+  int c = digitalRead(17);
+  int d = digitalRead(16);
+
+  String input = (String)d + (String)c + (String)b + (String)a;
+
+  Serial.println(input);
   String text = "";
-  if (digitalRead(5) == 0) {
-    text = "water";
+
+  if (input == "0001") {
+    text = "I want to go to the washroom";
+  } else if (input == "0010") {
+    text = "I need water";
+
+  } else if (input == "0011") {
+    text = "I am hungry";
+  } else if (input == "0100") {
+    text = "I need help";
+
+  } else if (input == "0101") {
+    text = "Please call someone";
+  } else if (input == "0110") {
+    text = "I feel pain";
+  } else if (input == "0111") {
+    text = "I want to rest";
+  } else if (input == "1000") {
+    text = "Please give me food";
+  } else if (input == "1001") {
+    text = "I want to go outside";
+  } else if (input == "1010") {
+    text = "Please bring my phone";
+
+  } else if (input == "1011") {
+    text = "I am feeling cold";
+  } else if (input == "1100") {
+    text = "I am feeling hot";
+  } else if (input == "1101") {
+    text = "Please turn on the light";
+
+  } else if (input == "1110") {
+    text = "Please turn off the light";
+  } else if (input == "1111") {
+    text = "thankyou";
+  } else {
+    text = "";
   }
+
+
   server.send(200, "text/plain", text);
+
 }
 /*=====================================================================================*/
 
 void setup() {
   Serial.begin(115200);
   delay(500);
+
+  pinMode(18, INPUT_PULLUP);
   pinMode(5, INPUT_PULLUP);
+  pinMode(17, INPUT_PULLUP);
+  pinMode(16, INPUT_PULLUP);
+
   WiFi.begin(ssid, password);
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
