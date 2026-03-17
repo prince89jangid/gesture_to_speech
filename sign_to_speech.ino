@@ -1,8 +1,20 @@
 #include <WiFi.h>
 #include <WebServer.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+
+
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
 
 String ssid = "S23";
 String password = "passward";
+String msg = "0000";
 
 WebServer server(80);
 
@@ -70,6 +82,18 @@ String webpage = R"====(
 
 /*========================================= Handlers ===================================*/
 
+
+// ===== Function to print text =====
+void showText(String msg) {
+  display.clearDisplay();
+  display.setTextSize(2);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(20, 25);
+
+  display.print(msg);
+  display.display();
+}
+
 void handleRoot() {
   server.send(200, "text/html", webpage);
 }
@@ -126,13 +150,15 @@ void getSign() {
   }
 
 
+  showText(text);
   server.send(200, "text/plain", text);
-
 }
 /*=====================================================================================*/
 
 void setup() {
   Serial.begin(115200);
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+
   delay(500);
 
   pinMode(18, INPUT_PULLUP);
@@ -141,11 +167,15 @@ void setup() {
   pinMode(16, INPUT_PULLUP);
 
   WiFi.begin(ssid, password);
+
+  showText("connecting...");
+
   while (WiFi.status() != WL_CONNECTED) {
     Serial.print(".");
   }
   Serial.println("\nconnected");
   Serial.println(WiFi.localIP());
+  showText(WiFi.localIP().toString());
 
 
   /*===================================== controlling fxn ==================================*/
