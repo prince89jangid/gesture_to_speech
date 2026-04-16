@@ -7,6 +7,9 @@
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
 
+
+
+
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 String ssid = "S23";
@@ -359,10 +362,10 @@ String webpage = R"====(
     <header>
       <div class="logo-row">
         <div class="logo-dot"></div>
-        <h1>Sign<span>Speak</span></h1>
+        <h1>Gesture<span>Talk</span></h1>
         <div class="logo-dot"></div>
       </div>
-      <p class="tagline">Sign Language → Voice Output System</p>
+      <p class="tagline">Intelligent sign to voice communication system</p>
     </header>
 
     <!-- Main Card -->
@@ -405,7 +408,7 @@ String webpage = R"====(
 
     </div>
 
-    <footer>Final Year Project &nbsp;·&nbsp; <span>ESP32</span> Sign-to-Speech &nbsp;·&nbsp; 2025</footer>
+    <footer>Final Year Project &nbsp;·&nbsp; <span>ESP32</span> Sign-to-Speech &nbsp;·&nbsp; 2026</footer>
 
     <script>
       const gestureMap = {
@@ -526,38 +529,89 @@ String webpage = R"====(
 
 /*========================================= Handlers ===================================*/
 
-void showText(String msg) {
-  display.clearDisplay();
-  display.setTextSize(1);
-  display.setTextColor(SSD1306_WHITE);
 
-  // Word wrap for OLED
-  int x = 0, y = 0;
-  for (int i = 0; i < msg.length(); i++) {
-    if (x > 110) { x = 0; y += 10; }
-    display.setCursor(x, y);
-    display.print(msg[i]);
-    x += 6;
+
+  void showText(String msg) {
+    display.clearDisplay();
+    display.setTextSize(2);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0, 0);
+
+    display.print(msg);
+    display.display();
   }
-  display.display();
-}
+
+
+
 
 void handleRoot() {
   server.send(200, "text/html", webpage);
 }
 
 void getSign() {
-  // d c b a
-  int a = digitalRead(15);
-  int b = digitalRead(17);
-  int c = digitalRead(4);
-  int d = digitalRead(16);
 
-  String input = (String)d + (String)c + (String)b + (String)a;
+
+
+  int S0 = analogRead(35);
+  int S1 = analogRead(34);
+  int S2 = analogRead(33);
+  int S3 = analogRead(32);
+
+  S0 /= 100;
+  S1 /= 100;
+  S2 /= 100;
+  S3 /= 100;
+
+
+
+  if (S3 >= 8) {
+    S3 = 1;
+  } else {
+    {
+      S3 = 0;
+    }
+  }
+
+  if (S2 >= 4) {
+    S2 = 1;
+  } else {
+    {
+      S2 = 0;
+    }
+  }
+
+  if (S1 >= 2) {
+    S1 = 1;
+  } else {
+    {
+      S1 = 0;
+    }
+  }
+
+  if (S0 >= 8) {
+    S0 = 1;
+  } else {
+    S0 = 0;
+  }
+
+
+  Serial.print(S3);
+  Serial.print(" ");
+
+  Serial.print(S2);
+  Serial.print(" ");
+
+  Serial.print(S1);
+  Serial.print(" ");
+
+  Serial.println(S0);
+  delay(200);
+
+  String input = (String)S3 + (String)S2 + (String)S1 + (String)S0;
   Serial.println(input);
 
   String text = "";
-  if      (input == "0001") text = "I want to go to the washroom";
+  if (input == "0001") text = "I want to go to the washroom";
   else if (input == "0010") text = "I need water";
   else if (input == "0011") text = "I am hungry";
   else if (input == "0100") text = "I need help";
@@ -571,8 +625,9 @@ void getSign() {
   else if (input == "1100") text = "I am feeling hot";
   else if (input == "1101") text = "Please turn on the light";
   else if (input == "1110") text = "Please turn off the light";
-  else if (input == "1111") text = "Thank you";
-  else                      text = "";
+  else if (input == "1111") text = "";
+  else if (input == "0000") text = "Hello";
+  else text = "";
 
   if (text != "") showText(text);
   server.send(200, "text/plain", text);
@@ -585,10 +640,11 @@ void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
   delay(500);
 
-  pinMode(15, INPUT_PULLUP);
-  pinMode(17, INPUT_PULLUP);
-  pinMode(4,  INPUT_PULLUP);
-  pinMode(16, INPUT_PULLUP);
+  // pinMode(15, INPUT_PULLUP);
+  // pinMode(17, INPUT_PULLUP);
+  // pinMode(4, INPUT_PULLUP);
+  // pinMode(16, INPUT_PULLUP);
+
 
   WiFi.begin(ssid, password);
   showText("Connecting...");
