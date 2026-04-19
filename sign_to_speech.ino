@@ -12,8 +12,8 @@
 
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
-String ssid = "S23";
-String password = "passward";
+String ssid = "gesture_talk";
+String password = "12345678";
 
 WebServer server(80);
 
